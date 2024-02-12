@@ -63,8 +63,8 @@ public class PlayerStatus : MonoBehaviour
 
     void UISetting()
     {
-        healthBar.fillAmount = currentHealth / maxHealth;
-        steminaBar.fillAmount = currentStamina / maxStamina;
+        healthBar.fillAmount = currentHealth / (maxHealth * increaseHealth);
+        steminaBar.fillAmount = currentStamina / (maxStamina * increaseStamina);
         expBar.fillAmount = exp / nextExp[level];
 
         healthText.text = currentHealth.ToString("F0") + " / " + (maxHealth * increaseHealth).ToString("F0");
