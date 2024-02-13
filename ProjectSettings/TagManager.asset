@@ -12,6 +12,7 @@ TagManager:
   - Seild
   - Enemy
   - EnemyAttack
+  - Dead
   layers:
   - Default
   - TransparentFX

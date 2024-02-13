@@ -78,6 +78,9 @@ public class PlayerStatus : MonoBehaviour
 
     void LevelUp()
     {
+        if (level >= nextExp.Length)
+            return;
+
         if (exp >= nextExp[level])
         {
             exp -= nextExp[level];

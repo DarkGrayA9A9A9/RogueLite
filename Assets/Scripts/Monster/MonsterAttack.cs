@@ -41,18 +41,13 @@ public class MonsterAttack : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") && !PlayerController.instance.die && !PlayerController.instance.stuned && !PlayerController.instance.invincibility)
         {
             if ((PlayerController.instance.guarding && PlayerController.instance.flipCheck && gameObject.transform.position.x < PlayerController.instance.playerPosition.x) || (PlayerController.instance.guarding && !PlayerController.instance.flipCheck && gameObject.transform.position.x > PlayerController.instance.playerPosition.x))
                 return;
 
             float random = Random.Range(0.5f, 1.5f);
             PlayerStatus.instance.currentHealth -= random * attack;
-
-            if (collision.gameObject.transform.position.x > gameObject.transform.position.x)
-                PlayerController.instance.KnockBackR();
-            else
-                PlayerController.instance.KnockBackL();
         }
     }
 }

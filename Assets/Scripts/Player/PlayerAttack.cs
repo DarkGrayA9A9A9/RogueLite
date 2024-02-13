@@ -36,4 +36,12 @@ public class PlayerAttack : MonoBehaviour
     {
         coll.enabled = false;
     }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            PlayerController.instance.MonsterAttackSound();
+        }
+    }
 }

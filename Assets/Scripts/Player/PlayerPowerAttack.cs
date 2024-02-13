@@ -24,7 +24,13 @@ public class PlayerPowerAttack : MonoBehaviour
                 last = 0;
 
             if (last < delay / 2)
-                coll.enabled = true;
+            {
+                if (!coll.enabled)
+                {
+                    coll.enabled = true;
+                    PlayerController.instance.PowerAttackSound();
+                }
+            } 
             else
                 coll.enabled = false;
         }
@@ -35,5 +41,11 @@ public class PlayerPowerAttack : MonoBehaviour
     void LateUpdate()
     {
         last += Time.deltaTime;
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+            PlayerController.instance.MonsterAttackSound();
     }
 }

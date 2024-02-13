@@ -193,11 +193,12 @@ MonoBehaviour:
   moveValue: 0
   moveSpeed: 7
   chaseDistance: 20
-  attackDistance: 5
-  knockBackPower: 10
+  attackDistance: 3
+  knockBackPower: 8
   lastAttack: 2
   attackDelay: 2
   attacking: 0
+  platformCheck: 0
   stun: 0
   die: 0
   bar: {fileID: 2165371138098169191}
@@ -386,7 +387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   monsterType: 0
-  attack: 8
+  attack: 7
 --- !u!1 &7260292238273184129
 GameObject:
   m_ObjectHideFlags: 0

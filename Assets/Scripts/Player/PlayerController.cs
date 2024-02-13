@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     public float attackDelay;
     public float powerAttackCharge;
     public float powerAttackFullCharge;
+    public float lastHit;
 
     [Header("# Skill Costs")]
     public float guardCost;
@@ -40,6 +41,7 @@ public class PlayerController : MonoBehaviour
     public bool powerAttacking;
     public bool flipCheck;
     public bool stuned;
+    public bool invincibility;
     public bool die;
     public bool portal;
     public Vector2 playerPosition;
@@ -47,10 +49,21 @@ public class PlayerController : MonoBehaviour
     [Header("# UI")]
     public Image blackBG;
 
+    [Header("# Sound Effects")]
+    public AudioClip[] attackSound;
+    public AudioClip jumpSound;
+    public AudioClip dashSound;
+    public AudioClip hitSound;
+    public AudioClip dieSound;
+    public AudioClip guardSound;
+    public AudioClip monsterHitSound;
+    public AudioClip[] monsterDieSound;
+
     Rigidbody2D rigid;
     CapsuleCollider2D coll;
     SpriteRenderer spriter;
     Animator anim;
+    AudioSource audio;
 
     public static PlayerController instance;
 
@@ -60,6 +73,7 @@ public class PlayerController : MonoBehaviour
         coll = GetComponent<CapsuleCollider2D>();
         spriter = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+        audio = GetComponent<AudioSource>();
 
         if (PlayerController.instance == null)
             PlayerController.instance = this;
@@ -179,6 +193,7 @@ public class PlayerController : MonoBehaviour
 
         if (!jumping[0])
         {
+            audio.PlayOneShot(jumpSound);
             jumping[0] = true;
             anim.SetBool("Jump0", true);
             rigid.velocity = Vector2.zero;
@@ -186,6 +201,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (!jumping[1])
         {
+            audio.PlayOneShot(jumpSound);
             jumping[1] = true;
             anim.SetBool("Jump1", true);
             rigid.velocity = Vector2.zero;
@@ -243,14 +259,17 @@ public class PlayerController : MonoBehaviour
             attacking = true;
             anim.SetBool("Attack", true);
             PlayerAttack.instance.AttackOn();
+            audio.clip = attackSound[0];
 
             if (!attackCombo)
             {
+                audio.Play();
                 attackCombo = true;
                 anim.SetTrigger("Attack0");
             }
             else
             {
+                audio.Play();
                 attackCombo = false;
                 anim.SetTrigger("Attack1");
             }
@@ -318,6 +337,7 @@ public class PlayerController : MonoBehaviour
 
         if (lastDash > dashDelay && PlayerStatus.instance.currentStamina >= dashCost)
         {
+            audio.PlayOneShot(dashSound, 6f);
             PlayerStatus.instance.currentStamina -= dashCost;
             attacking = false;
             dashing = true;
@@ -346,6 +366,7 @@ public class PlayerController : MonoBehaviour
         lastJump += Time.deltaTime;
         lastDash += Time.deltaTime;
         lastAttack += Time.deltaTime;
+        lastHit += Time.deltaTime;
 
         if (lastAttack > 1.5f)
             attackCombo = false;
@@ -355,7 +376,12 @@ public class PlayerController : MonoBehaviour
             attacking = false;
             anim.SetBool("Attack", false);
         }
-        
+
+        if (lastHit > 0.5f)
+            stuned = false;
+
+        if (lastHit > 2f)
+            invincibility = false;
 
         if (!guarding && !dashing && !attacking && !powerAttacking)
             PlayerStatus.instance.currentStamina += Time.deltaTime;
@@ -397,39 +423,65 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.CompareTag("Floor"))
             onFloor = true;
 
-        if (collision.gameObject.CompareTag("Enemy") && !stuned)
+        if (collision.gameObject.CompareTag("Enemy") && !stuned && !invincibility && !die)
         {
             if (guarding && ((spriter.flipX && gameObject.transform.position.x > collision.transform.position.x) || (!spriter.flipX && gameObject.transform.position.x < collision.transform.position.x)))
                 return;
 
+            lastHit = 0;
+            audio.PlayOneShot(hitSound);
             anim.SetTrigger("Hit");
             stuned = true;
+            invincibility = true;
             rigid.velocity = Vector2.zero;
 
             if (collision.transform.position.x > rigid.transform.position.x)
                 rigid.AddForce(Vector2.left * knockBackPower, ForceMode2D.Impulse);
             else
                 rigid.AddForce(Vector2.right * knockBackPower, ForceMode2D.Impulse);
-
-            Invoke("StunExit", 0.5f);
         }
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Floor"))
             onFloor = false;
     }
 
-    void StunExit()
+    void OnTriggerEnter2D(Collider2D collision)
     {
-        stuned = false;
+        if (collision.gameObject.CompareTag("EnemyAttack") && !stuned && !invincibility && !die)
+        {
+            if (guarding)
+            {
+                if ((collision.gameObject.transform.position.x > rigid.transform.position.x && !spriter.flipX) || collision.gameObject.transform.position.x < rigid.transform.position.x && spriter.flipX)
+                {
+                    audio.PlayOneShot(guardSound);
+                    return;
+                }   
+            }
+
+            audio.PlayOneShot(hitSound);
+            anim.SetTrigger("Hit");
+            lastHit = 0;
+            stuned = true;
+            invincibility = true;
+            rigid.velocity = Vector2.zero;
+
+            if (collision.gameObject.transform.position.x > rigid.transform.position.x)
+                rigid.AddForce(Vector2.left * knockBackPower, ForceMode2D.Impulse);
+            else
+                rigid.AddForce(Vector2.right * knockBackPower, ForceMode2D.Impulse);
+        }
+            
     }
 
     void Dead()
     {
         if (!die)
         {
+            audio.PlayOneShot(dieSound);
+            Physics2D.IgnoreLayerCollision(3, 7, true);
             die = true;
             anim.SetBool("Death", true);
             anim.SetTrigger("Die");
@@ -479,6 +531,7 @@ public class PlayerController : MonoBehaviour
         gameObject.transform.position = new Vector3(0, -2, 0);
         anim.SetBool("Death", false);
         GameManager.instance.leftMonster = 0;
+        GameManager.instance.floor = 0;
         PlayerStatus.instance.exp = 0;
         PlayerStatus.instance.level = 0;
         PlayerStatus.instance.increaseAttack = 1;
@@ -489,6 +542,18 @@ public class PlayerController : MonoBehaviour
         PlayerStatus.instance.currentHealth = PlayerStatus.instance.maxHealth;
         PlayerStatus.instance.currentStamina = PlayerStatus.instance.maxStamina;
         GameManager.instance.levelUp = false;
+        guarding = false;
+        attacking = false;
+        powerAttacking = false;
+        dashing = false;
+        stuned = false;
+        Physics2D.IgnoreLayerCollision(3, 7, false);
+
+        for (int index = 0; index < GameManager.instance.dungeonMaps.Length; index++)
+        {
+            GameManager.instance.dungeonMaps[index].SetActive(false);
+        }
+        
         attacking = false;
         powerAttacking = false;
         guarding = false;
@@ -540,5 +605,29 @@ public class PlayerController : MonoBehaviour
         GameManager.instance.DungeonSetting();
 
         gameObject.transform.position = target;
+    }
+
+    public void MonsterAttackSound()
+    {
+        audio.PlayOneShot(monsterHitSound);
+    }
+
+    public void PowerAttackSound()
+    {
+        audio.clip = attackSound[1];
+        audio.Play();
+    }
+
+    public void MonsterDieSound(int type)
+    {
+        switch (type)
+        {
+            case 0:
+                audio.PlayOneShot(monsterDieSound[0]);
+                break;
+            case 1:
+                audio.PlayOneShot(monsterDieSound[1]);
+                break;
+        }
     }
 }

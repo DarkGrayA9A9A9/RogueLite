@@ -28,6 +28,7 @@ public class Monster : MonoBehaviour
 
     [Header("# State Check")]
     public bool attacking;
+    public bool platformCheck;
     public bool stun;
     public bool die;
 
@@ -65,7 +66,7 @@ public class Monster : MonoBehaviour
                 break;
         }
 
-        if (Mathf.Abs(rigid.velocity.x) < 0.01f && !attacking)
+        if (Mathf.Abs(rigid.velocity.x) < 0.01f && !attacking && !die)
         {
             if (gameObject.transform.position.x < PlayerController.instance.playerPosition.x)
                 spriter.flipX = false;
@@ -74,6 +75,7 @@ public class Monster : MonoBehaviour
         }
 
         InteractionPlayer();
+        PlatformCheck();
     }
 
     void LateUpdate()
@@ -101,7 +103,7 @@ public class Monster : MonoBehaviour
 
     void MoveLogic()
     {
-        if (attacking || die || stun)
+        if (!platformCheck || attacking || die || stun)
         {
             moveValue = 0;
             return;
@@ -115,7 +117,7 @@ public class Monster : MonoBehaviour
         if (attacking || die)
             return;
 
-        if (Mathf.Abs(rigid.transform.position.x - PlayerController.instance.playerPosition.x) < chaseDistance && Mathf.Abs(rigid.transform.position.x - PlayerController.instance.playerPosition.x) > attackDistance)
+        if (platformCheck && Vector2.Distance(rigid.transform.position, PlayerController.instance.playerPosition) < chaseDistance && Vector2.Distance(rigid.transform.position, PlayerController.instance.playerPosition) > attackDistance)
         {
             if (rigid.transform.position.x > PlayerController.instance.playerPosition.x)
                 moveValue = -1;
@@ -126,11 +128,21 @@ public class Monster : MonoBehaviour
         {
             moveValue = 0;
 
-            if (Mathf.Abs(rigid.transform.position.x - PlayerController.instance.playerPosition.x) < attackDistance && lastAttack > attackDelay)
-            {
+            if (Vector2.Distance(rigid.transform.position, PlayerController.instance.playerPosition) < attackDistance && lastAttack > attackDelay)
                 Attack();
-            }
         }
+    }
+
+    void PlatformCheck()
+    {
+        Vector2 frontVec = new Vector2(rigid.position.x + moveValue * 1.5f, rigid.position.y - 3f);
+        Debug.DrawRay(frontVec, Vector2.down, new Color(1, 0, 0));
+        RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector2.down, 1, LayerMask.GetMask("Platform"));
+
+        if (rayHit.collider != null && rayHit.distance < 0.5f)
+            platformCheck = true;
+        else
+            platformCheck = false;
     }
 
     void Attack()
@@ -171,6 +183,16 @@ public class Monster : MonoBehaviour
 
     void Dead()
     {
+        switch (monsterType)
+        {
+            case MonsterType.Goblin:
+                PlayerController.instance.MonsterDieSound(0);
+                break;
+            case MonsterType.Skeleton:
+                PlayerController.instance.MonsterDieSound(1);
+                break;
+        }
+
         PlayerStatus.instance.exp += exp;
         die = true;
         GameManager.instance.leftMonster--;
@@ -181,12 +203,18 @@ public class Monster : MonoBehaviour
 
     void Destroy()
     {
-        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Dead"))
+        {
+            GameManager.instance.leftMonster--;
+            Destroy();
+        } 
+
+        if (collision.gameObject.CompareTag("Player") && !PlayerController.instance.die && !PlayerController.instance.stuned && !PlayerController.instance.invincibility)
         {
             if ((PlayerController.instance.guarding && PlayerController.instance.flipCheck && gameObject.transform.position.x < PlayerController.instance.playerPosition.x) || (PlayerController.instance.guarding && !PlayerController.instance.flipCheck && gameObject.transform.position.x > PlayerController.instance.playerPosition.x))
                 return;
