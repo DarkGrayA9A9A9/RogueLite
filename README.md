@@ -6,6 +6,10 @@
 
 https://drive.google.com/file/d/1cPB59UYDZEY-q-P9mkVi33Kqe_mHA4Sk/view?usp=drive_link
 
+# 웹버전
+
+https://darkgraya9a9a9.itch.io/roguelite
+
 # 조작법
 
 이동 : A, D
