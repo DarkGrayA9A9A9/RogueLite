@@ -19,6 +19,19 @@ public class MonsterAttack : MonoBehaviour
         spriter = GetComponentInParent<SpriteRenderer>();
     }
 
+    void Start()
+    {
+        switch (monsterType)
+        {
+            case MonsterType.Goblin:
+                attack = 6 + (6 * (float)GameManager.instance.floor / 5);
+                break;
+            case MonsterType.Skeleton:
+                attack = 15 + (15 * (float)GameManager.instance.floor / 5);
+                break;
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {

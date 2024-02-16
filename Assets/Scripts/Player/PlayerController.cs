@@ -58,6 +58,8 @@ public class PlayerController : MonoBehaviour
     public AudioClip guardSound;
     public AudioClip monsterHitSound;
     public AudioClip[] monsterDieSound;
+    public AudioClip menuSound;
+    public AudioClip enforceSound;
 
     Rigidbody2D rigid;
     CapsuleCollider2D coll;
@@ -86,6 +88,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
+            return;
+
         Landing();
         KeyInput();
         FlipCheck();
@@ -122,11 +127,17 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
+            return;
+
         Move();
     }
 
     void LateUpdate()
     {
+        if (GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
+            return;
+
         anim.SetFloat("Speed", Mathf.Abs(moveInput));
 
         Timer();
@@ -173,12 +184,12 @@ public class PlayerController : MonoBehaviour
         if (attacking || dashing || guarding || stuned)
             return;
 
-        rigid.velocity = new Vector2(moveInput * moveSpeed * PlayerStatus.instance.increaseSpeed, rigid.velocity.y);
+        rigid.velocity = new Vector2(moveInput * moveSpeed * (PlayerStatus.instance.increaseSpeed + PlayerStatus.instance.enforceSpeed), rigid.velocity.y);
     }
 
     void Jump()
     {
-        if (attacking || powerAttacking || dashing || guarding || stuned || lastJump < jumpDelay)
+        if (attacking || powerAttacking || dashing || guarding || stuned || lastJump < jumpDelay || GameManager.instance.delay < 0.1f)
             return;
 
         lastJump = 0f;
@@ -337,7 +348,7 @@ public class PlayerController : MonoBehaviour
 
         if (lastDash > dashDelay && PlayerStatus.instance.currentStamina >= dashCost)
         {
-            audio.PlayOneShot(dashSound, 6f);
+            audio.PlayOneShot(dashSound, audio.volume * 20f);
             PlayerStatus.instance.currentStamina -= dashCost;
             attacking = false;
             dashing = true;
@@ -522,6 +533,7 @@ public class PlayerController : MonoBehaviour
         }
 
         die = false;
+        GameManager.instance.Save();
 
         yield return null;
     }
@@ -603,7 +615,6 @@ public class PlayerController : MonoBehaviour
     public void Teleport(Vector3 target)
     {
         GameManager.instance.DungeonSetting();
-
         gameObject.transform.position = target;
     }
 
@@ -629,5 +640,20 @@ public class PlayerController : MonoBehaviour
                 audio.PlayOneShot(monsterDieSound[1]);
                 break;
         }
+    }
+
+    public void MenuSound()
+    {
+        audio.PlayOneShot(menuSound);
+    }
+
+    public void SoundEffectSetting()
+    {
+        audio.volume = GameManager.instance.SEValue;
+    }
+
+    public void EnforceSound()
+    {
+        audio.PlayOneShot(enforceSound);
     }
 }

@@ -186,10 +186,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   monsterType: 0
+  random: 0
   currentHealth: 25
   maxHealth: 25
-  exp: 5
+  exp: 4
   attack: 5
+  money: 0
   moveValue: 0
   moveSpeed: 7
   chaseDistance: 20

@@ -25,6 +25,13 @@ public class PlayerStatus : MonoBehaviour
     public float increaseHealth; // 생명력 증가
     public float increaseStamina; // 스태미나 증가
 
+    [Header("# Enforce Value")]
+    public float enforceAttack;
+    public float enforcePowerAttack;
+    public float enforceSpeed;
+    public float enforceHealth;
+    public float enforceStamina;
+
     [Header("# UI")]
     public Image healthBar;
     public Image steminaBar;
@@ -40,7 +47,6 @@ public class PlayerStatus : MonoBehaviour
             PlayerStatus.instance = this;
     }
 
-    
     void Update()
     {
         LevelUp();
@@ -54,26 +60,26 @@ public class PlayerStatus : MonoBehaviour
 
     void StatusSetting()
     {
-        if (currentHealth > maxHealth * increaseHealth)
-            currentHealth = maxHealth * increaseHealth;
+        if (currentHealth > maxHealth * (increaseHealth + enforceHealth))
+            currentHealth = maxHealth * (increaseHealth + enforceHealth);
 
-        if (currentStamina > maxStamina * increaseStamina)
-            currentStamina = maxStamina * increaseStamina;
+        if (currentStamina > maxStamina * (increaseStamina + enforceStamina))
+            currentStamina = maxStamina * (increaseStamina + enforceStamina);
     }
 
     void UISetting()
     {
-        healthBar.fillAmount = currentHealth / (maxHealth * increaseHealth);
-        steminaBar.fillAmount = currentStamina / (maxStamina * increaseStamina);
+        healthBar.fillAmount = currentHealth / (maxHealth * (increaseHealth + enforceHealth));
+        steminaBar.fillAmount = currentStamina / (maxStamina * (increaseStamina + enforceStamina));
         expBar.fillAmount = exp / nextExp[level];
 
-        healthText.text = currentHealth.ToString("F0") + " / " + (maxHealth * increaseHealth).ToString("F0");
+        healthText.text = currentHealth.ToString("F0") + " / " + (maxHealth * (increaseHealth + enforceHealth)).ToString("F0");
         levelText.text = "Lv." + (level + 1).ToString();
 
         if (currentHealth < 0)
-            healthText.text = "0 / " + (maxHealth * increaseHealth).ToString("F0");
+            healthText.text = "0 / " + (maxHealth * (increaseHealth + enforceHealth)).ToString("F0");
         else
-            healthText.text = currentHealth.ToString("F0") + " / " + (maxHealth * increaseHealth).ToString("F0");
+            healthText.text = currentHealth.ToString("F0") + " / " + (maxHealth * (increaseHealth + enforceHealth)).ToString("F0");
     }
 
     void LevelUp()

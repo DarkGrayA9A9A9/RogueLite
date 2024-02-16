@@ -19,10 +19,8 @@ public class Portal : MonoBehaviour
     void Update()
     {
         if (portalOn && Input.GetButtonDown("Up") && GameManager.instance.leftMonster < 1)
-        {
-            GameManager.instance.floor++;
             PlayerController.instance.Fade(targetPosition);
-        }
+
     }
 
     void OnTriggerEnter2D(Collider2D collision)

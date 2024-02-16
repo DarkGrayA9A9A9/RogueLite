@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,11 +10,14 @@ public class Monster : MonoBehaviour
     public enum MonsterType { Goblin, Skeleton }
     public MonsterType monsterType;
 
+    public int random;
+
     [Header("# Status")]
     public float currentHealth;
     public float maxHealth;
     public float exp;
     public float attack;
+    public int money;
 
     [Header("# Movement")]
     public float moveValue;
@@ -48,8 +52,34 @@ public class Monster : MonoBehaviour
         coll = GetComponent<CapsuleCollider2D>();
     }
 
+    void Start()
+    {
+        switch (monsterType)
+        {
+            case MonsterType.Goblin:
+                random = Random.Range(3, 8);
+
+                maxHealth = 10 + (10 * (float)GameManager.instance.floor / 5);
+                attack = 4 + (4 * (float)GameManager.instance.floor / 5);
+                money = random;
+                break;
+            case MonsterType.Skeleton:
+                random = Random.Range(7, 16);
+
+                maxHealth = 20 + (20 * (float)GameManager.instance.floor / 5);
+                attack = 10 + (10 * (float)GameManager.instance.floor / 5);
+                money = random;
+                break;
+        }
+
+        currentHealth = maxHealth;
+    }
+
     void Update()
     {
+        if (rigid.velocity.y < -25f)
+            rigid.velocity = new Vector2(rigid.velocity.x, -25f);
+
         switch (monsterType)
         {
             case MonsterType.Goblin:
@@ -135,7 +165,7 @@ public class Monster : MonoBehaviour
 
     void PlatformCheck()
     {
-        Vector2 frontVec = new Vector2(rigid.position.x + moveValue * 1.5f, rigid.position.y - 3f);
+        Vector2 frontVec = new Vector2(rigid.position.x + moveValue * 2.5f, rigid.position.y - 3f);
         Debug.DrawRay(frontVec, Vector2.down, new Color(1, 0, 0));
         RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector2.down, 1, LayerMask.GetMask("Platform"));
 
@@ -167,7 +197,7 @@ public class Monster : MonoBehaviour
 
     void HealthBar()
     {
-        if (currentHealth == maxHealth)
+        if (currentHealth == maxHealth || currentHealth <= 0)
         {
             bar.SetActive(false);
             healthBar.enabled = false;
@@ -195,6 +225,7 @@ public class Monster : MonoBehaviour
 
         PlayerStatus.instance.exp += exp;
         die = true;
+        GameManager.instance.money += money;
         GameManager.instance.leftMonster--;
         gameObject.layer = 8;
         anim.SetTrigger("Die");
@@ -237,7 +268,7 @@ public class Monster : MonoBehaviour
                 rigid.AddForce(Vector2.right * knockBackPower, ForceMode2D.Impulse);
 
             float random = Random.Range(0.5f, 1.5f);
-            currentHealth -= random * PlayerStatus.instance.attack * PlayerStatus.instance.increaseAttack;
+            currentHealth -= random * PlayerStatus.instance.attack * (PlayerStatus.instance.increaseAttack + PlayerStatus.instance.enforceAttack);
 
             Invoke("StunExit", 0.25f);
         }
@@ -245,7 +276,7 @@ public class Monster : MonoBehaviour
         if (collision.gameObject.CompareTag("PowerAttack"))
         {
             float random = Random.Range(0.5f, 1.5f);
-            currentHealth -= random * PlayerStatus.instance.powerAttack * PlayerStatus.instance.increasePowerAttack;
+            currentHealth -= random * PlayerStatus.instance.powerAttack * (PlayerStatus.instance.increasePowerAttack + PlayerStatus.instance.enforcePowerAttack);
         }
     }
 
