@@ -4,7 +4,7 @@
 
 # 다운로드
 
-https://drive.google.com/file/d/1BfiDoidW938jV7BIUhz9x86oBg5FOt-D/view?usp=drive_link
+https://drive.google.com/file/d/1cPB59UYDZEY-q-P9mkVi33Kqe_mHA4Sk/view?usp=drive_link
 
 # 조작법
 
