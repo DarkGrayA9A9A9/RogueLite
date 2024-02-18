@@ -81,16 +81,8 @@ public class PlayerController : MonoBehaviour
             PlayerController.instance = this;
     }
 
-    void Start()
-    {
-        
-    }
-
     void Update()
     {
-        if (GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
-            return;
-
         Landing();
         KeyInput();
         FlipCheck();
@@ -127,17 +119,11 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
-            return;
-
         Move();
     }
 
     void LateUpdate()
     {
-        if (GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
-            return;
-
         anim.SetFloat("Speed", Mathf.Abs(moveInput));
 
         Timer();
@@ -189,7 +175,7 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
-        if (attacking || powerAttacking || dashing || guarding || stuned || lastJump < jumpDelay || GameManager.instance.delay < 0.1f)
+        if (attacking || powerAttacking || dashing || guarding || stuned || lastJump < jumpDelay || GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
             return;
 
         lastJump = 0f;
@@ -491,6 +477,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!die)
         {
+            GameManager.instance.Save();
             audio.PlayOneShot(dieSound);
             Physics2D.IgnoreLayerCollision(3, 7, true);
             die = true;

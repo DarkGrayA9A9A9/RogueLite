@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour
 
     [Header("# In Game UI")]
     public Text showFloor;
+    public Text showLeftMonster;
     public Text showMoney;
 
     [Header("# Pause Menu UI")]
@@ -87,6 +88,11 @@ public class GameManager : MonoBehaviour
     public Text enforceStamina;
     public Text enforceSpeed;
     public GameObject enforceCursor;
+    public Text priceAttack;
+    public Text pricePowerAttack;
+    public Text priceHealth;
+    public Text priceStamina;
+    public Text priceSpeed;
 
     public int attackLV;
     public int powerAttackLV;
@@ -108,17 +114,19 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        Load();
-        OptionLoad();
-
         audio = GetComponent<AudioSource>();
 
         Cursor.visible = false;
 
-        InitKorea();
-
         if (GameManager.instance == null)
             GameManager.instance = this;
+    }
+
+    void Start()
+    {
+        InitKorea();
+        OptionLoad();
+        Load();
     }
 
     void Update()
@@ -164,6 +172,12 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetFloat("Health", PlayerStatus.instance.enforceHealth);
         PlayerPrefs.SetFloat("Stamina", PlayerStatus.instance.enforceStamina);
         PlayerPrefs.SetFloat("Speed", PlayerStatus.instance.enforceSpeed);
+        PlayerPrefs.SetInt("AttackLV", attackLV);
+        PlayerPrefs.SetInt("PowerAttackLV", powerAttackLV);
+        PlayerPrefs.SetInt("HealthLV", healthLV);
+        PlayerPrefs.SetInt("StaminaLV", staminaLV);
+        PlayerPrefs.SetInt("SpeedLV", speedLV);
+        PlayerPrefs.SetInt("Money", money);
     }
 
     public void Load()
@@ -176,6 +190,12 @@ public class GameManager : MonoBehaviour
         PlayerStatus.instance.enforceHealth = PlayerPrefs.GetFloat("Health");
         PlayerStatus.instance.enforceStamina = PlayerPrefs.GetFloat("Stamina");
         PlayerStatus.instance.enforceSpeed = PlayerPrefs.GetFloat("Speed");
+        attackLV = PlayerPrefs.GetInt("AttackLV");
+        powerAttackLV = PlayerPrefs.GetInt("PowerAttackLV");
+        healthLV = PlayerPrefs.GetInt("HealthLV");
+        staminaLV = PlayerPrefs.GetInt("StaminaLV");
+        speedLV = PlayerPrefs.GetInt("SpeedLV");
+        money = PlayerPrefs.GetInt("Money");
     }
 
     void OptionSave()
@@ -222,6 +242,8 @@ public class GameManager : MonoBehaviour
         enforceStamina.text = staminaLV.ToString();
         enforceSpeed.text = speedLV.ToString();
 
+        ShowPrice();
+
         if (Input.GetButtonDown("Up") && selectEnforce > 0)
         {
             PlayerController.instance.MenuSound();
@@ -266,6 +288,7 @@ public class GameManager : MonoBehaviour
                         PlayerStatus.instance.enforceAttack += 0.2f;
                         money -= enforcePrice[attackLV];
                         attackLV++;
+                        Save();
                     }   
                     break;
                 case 1:
@@ -275,6 +298,7 @@ public class GameManager : MonoBehaviour
                         PlayerStatus.instance.enforcePowerAttack += 0.2f;
                         money -= enforcePrice[powerAttackLV];
                         powerAttackLV++;
+                        Save();
                     }
                     break;
                 case 2:
@@ -284,6 +308,7 @@ public class GameManager : MonoBehaviour
                         PlayerStatus.instance.enforceHealth += 0.2f;
                         money -= enforcePrice[healthLV];
                         healthLV++;
+                        Save();
                     }
                     break;
                 case 3:
@@ -293,6 +318,7 @@ public class GameManager : MonoBehaviour
                         PlayerStatus.instance.enforceStamina += 0.2f;
                         money -= enforcePrice[staminaLV];
                         staminaLV++;
+                        Save();
                     }
                     break;
                 case 4:
@@ -302,6 +328,7 @@ public class GameManager : MonoBehaviour
                         PlayerStatus.instance.enforceSpeed += 0.2f;
                         money -= enforcePrice[speedLV];
                         speedLV++;
+                        Save();
                     } 
                     break;
             }
@@ -313,6 +340,26 @@ public class GameManager : MonoBehaviour
             enforce = false;
             enforceSystemCanvas.SetActive(false);
             Time.timeScale = 1;
+        }
+    }
+
+    void ShowPrice()
+    {
+        if (language == 0)
+        {
+            priceAttack.text = enforcePrice[attackLV].ToString() + " 원";
+            pricePowerAttack.text = enforcePrice[powerAttackLV].ToString() + " 원";
+            priceHealth.text = enforcePrice[healthLV].ToString() + " 원";
+            priceStamina.text = enforcePrice[staminaLV].ToString() + " 원";
+            priceSpeed.text = enforcePrice[speedLV].ToString() + " 원";
+        }
+        else
+        {
+            priceAttack.text = enforcePrice[attackLV].ToString() + " G";
+            pricePowerAttack.text = enforcePrice[powerAttackLV].ToString() + " G";
+            priceHealth.text = enforcePrice[healthLV].ToString() + " G";
+            priceStamina.text = enforcePrice[staminaLV].ToString() + " G";
+            priceSpeed.text = enforcePrice[speedLV].ToString() + " G";
         }
     }
 
@@ -670,20 +717,25 @@ public class GameManager : MonoBehaviour
 
     void ShowInfo()
     {
-        if (language ==0)
+        if (language == 0)
             showMoney.text = money.ToString() + " 원";
         else
             showMoney.text = money.ToString() + " G";
 
         if (floor > 0)
         {
+            showLeftMonster.text = leftMonster.ToString();
+
             if (language == 0)
                 showFloor.text = "던전 " + floor.ToString() + "층";
             else
                 showFloor.text = "Floor " + floor.ToString();
-        }  
+        }
         else
+        {
+            showLeftMonster.text = "";
             showFloor.text = "";
+        }
     }
 
     public void DungeonSetting()

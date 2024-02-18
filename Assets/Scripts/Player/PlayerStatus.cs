@@ -45,6 +45,8 @@ public class PlayerStatus : MonoBehaviour
     {
         if (PlayerStatus.instance == null)
             PlayerStatus.instance = this;
+
+        Load();
     }
 
     void Update()
@@ -56,6 +58,18 @@ public class PlayerStatus : MonoBehaviour
     {
         StatusSetting();
         UISetting();
+    }
+
+    public void Load()
+    {
+        if (!PlayerPrefs.HasKey("Attack"))
+            return;
+
+        enforceAttack = PlayerPrefs.GetFloat("Attack");
+        instance.enforcePowerAttack = PlayerPrefs.GetFloat("PowerAttack");
+        instance.enforceHealth = PlayerPrefs.GetFloat("Health");
+        instance.enforceStamina = PlayerPrefs.GetFloat("Stamina");
+        instance.enforceSpeed = PlayerPrefs.GetFloat("Speed");
     }
 
     void StatusSetting()
