@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MonsterAttack : MonoBehaviour
 {
-    public enum MonsterType { Goblin, Skeleton }
+    public enum MonsterType { Goblin, Mushroom, Skeleton }
     public MonsterType monsterType;
 
     public float attack;
@@ -24,7 +24,10 @@ public class MonsterAttack : MonoBehaviour
         switch (monsterType)
         {
             case MonsterType.Goblin:
-                attack = 6 + (6 * (float)GameManager.instance.floor / 5);
+                attack = 7 + (7 * (float)GameManager.instance.floor / 5);
+                break;
+            case MonsterType.Mushroom:
+                attack = 10 + (10 * (float)GameManager.instance.floor / 5);
                 break;
             case MonsterType.Skeleton:
                 attack = 15 + (15 * (float)GameManager.instance.floor / 5);
@@ -32,7 +35,6 @@ public class MonsterAttack : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         switch (monsterType)
@@ -42,6 +44,12 @@ public class MonsterAttack : MonoBehaviour
                     transform.rotation = Quaternion.Euler(0, 0, 25f);
                 else
                     transform.rotation = Quaternion.Euler(0, 0, -25f);
+                break;
+            case MonsterType.Mushroom:
+                if (spriter.flipX)
+                    coll.offset = new Vector2(-0.62f, -0.39f);
+                else
+                    coll.offset = new Vector2(0.62f, -0.39f);
                 break;
             case MonsterType.Skeleton:
                 if (spriter.flipX)
@@ -57,8 +65,12 @@ public class MonsterAttack : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && !PlayerController.instance.die && !PlayerController.instance.stuned && !PlayerController.instance.invincibility)
         {
             if ((PlayerController.instance.guarding && PlayerController.instance.flipCheck && gameObject.transform.position.x < PlayerController.instance.playerPosition.x) || (PlayerController.instance.guarding && !PlayerController.instance.flipCheck && gameObject.transform.position.x > PlayerController.instance.playerPosition.x))
+            {
+                SoundEffect.instance.Guard();
                 return;
+            }
 
+            SoundEffect.instance.Hit();
             float random = Random.Range(0.5f, 1.5f);
             PlayerStatus.instance.currentHealth -= random * attack;
         }

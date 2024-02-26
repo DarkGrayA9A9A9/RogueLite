@@ -28,7 +28,7 @@ public class PlayerPowerAttack : MonoBehaviour
                 if (!coll.enabled)
                 {
                     coll.enabled = true;
-                    PlayerController.instance.PowerAttackSound();
+                    SoundEffect.instance.PowerAttackSound();
                 }
             } 
             else
@@ -46,6 +46,6 @@ public class PlayerPowerAttack : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
-            PlayerController.instance.MonsterAttackSound();
+            SoundEffect.instance.MonsterHit();
     }
 }

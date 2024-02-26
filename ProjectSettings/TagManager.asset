@@ -13,6 +13,8 @@ TagManager:
   - Enemy
   - EnemyAttack
   - Dead
+  - Boss
+  - Bullet
   layers:
   - Default
   - TransparentFX
@@ -23,7 +25,7 @@ TagManager:
   - Platform
   - Enemy
   - EnemyDie
-  - 
+  - Boss
   - 
   - 
   - 

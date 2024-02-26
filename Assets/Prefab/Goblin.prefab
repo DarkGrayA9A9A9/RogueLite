@@ -193,12 +193,12 @@ MonoBehaviour:
   attack: 5
   money: 0
   moveValue: 0
-  moveSpeed: 7
+  moveSpeed: 6
   chaseDistance: 20
-  attackDistance: 3
-  knockBackPower: 8
-  lastAttack: 2
-  attackDelay: 2
+  attackDistance: 3.5
+  knockBackPower: 6
+  lastAttack: 1.5
+  attackDelay: 1.5
   attacking: 0
   platformCheck: 0
   stun: 0

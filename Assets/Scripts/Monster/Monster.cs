@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class Monster : MonoBehaviour
 {
-    public enum MonsterType { Goblin, Skeleton }
+    public enum MonsterType { Goblin, Mushroom, Skeleton }
     public MonsterType monsterType;
 
     public int random;
@@ -63,8 +63,15 @@ public class Monster : MonoBehaviour
                 attack = 4 + (4 * (float)GameManager.instance.floor / 5);
                 money = random;
                 break;
+            case MonsterType.Mushroom:
+                random = Random.Range(6, 11);
+
+                maxHealth = 15 + (15 * (float)GameManager.instance.floor / 5);
+                attack = 6 + (6 * (float)GameManager.instance.floor / 5);
+                money = random;
+                break;
             case MonsterType.Skeleton:
-                random = Random.Range(7, 16);
+                random = Random.Range(10, 16);
 
                 maxHealth = 20 + (20 * (float)GameManager.instance.floor / 5);
                 attack = 10 + (10 * (float)GameManager.instance.floor / 5);
@@ -106,14 +113,14 @@ public class Monster : MonoBehaviour
 
         InteractionPlayer();
         PlatformCheck();
+
+        if (currentHealth <= 0 && !die)
+            Dead();
     }
 
     void LateUpdate()
     {
-        if (currentHealth <= 0 && !die)
-            Dead();
-
-        if (!attacking)
+        if (!attacking || !die)
         {
             if (moveValue < -0.01)
                 spriter.flipX = true;
@@ -177,6 +184,9 @@ public class Monster : MonoBehaviour
 
     void Attack()
     {
+        if (die)
+            return;
+
         attacking = true;
         lastAttack = 0;
         anim.SetTrigger("Attack");
@@ -216,19 +226,24 @@ public class Monster : MonoBehaviour
         switch (monsterType)
         {
             case MonsterType.Goblin:
-                PlayerController.instance.MonsterDieSound(0);
+                SoundEffect.instance.MonsterDie(0);
+                break;
+            case MonsterType.Mushroom:
+                SoundEffect.instance.MonsterDie(1);
                 break;
             case MonsterType.Skeleton:
-                PlayerController.instance.MonsterDieSound(1);
+                SoundEffect.instance.MonsterDie(2);
                 break;
         }
 
+        anim.ResetTrigger("Hit");
+        anim.SetTrigger("Die");
         PlayerStatus.instance.exp += exp;
         die = true;
         GameManager.instance.money += money;
         GameManager.instance.leftMonster--;
         gameObject.layer = 8;
-        anim.SetTrigger("Die");
+        
         Invoke("Destroy", 5f);
     }
 
@@ -259,6 +274,11 @@ public class Monster : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Attack"))
         {
+            if (die)
+                return;
+
+            Debug.Log("ÀÏ¹Ý");
+            anim.SetTrigger("Hit");
             stun = true;
             rigid.velocity = Vector2.zero;
 
@@ -275,8 +295,23 @@ public class Monster : MonoBehaviour
 
         if (collision.gameObject.CompareTag("PowerAttack"))
         {
+            if (die)
+                return;
+
+            Debug.Log("°­");
+            anim.SetTrigger("Hit");
+            stun = true;
+            rigid.velocity = Vector2.zero;
+
+            if (collision.transform.position.x > gameObject.transform.position.x)
+                rigid.AddForce(Vector2.left * knockBackPower, ForceMode2D.Impulse);
+            else
+                rigid.AddForce(Vector2.right * knockBackPower, ForceMode2D.Impulse);
+
             float random = Random.Range(0.5f, 1.5f);
             currentHealth -= random * PlayerStatus.instance.powerAttack * (PlayerStatus.instance.increasePowerAttack + PlayerStatus.instance.enforcePowerAttack);
+
+            Invoke("StunExit", 0.25f);
         }
     }
 

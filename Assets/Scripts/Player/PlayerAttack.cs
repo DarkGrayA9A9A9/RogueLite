@@ -41,7 +41,7 @@ public class PlayerAttack : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            PlayerController.instance.MonsterAttackSound();
+            SoundEffect.instance.MonsterHit();
         }
     }
 }

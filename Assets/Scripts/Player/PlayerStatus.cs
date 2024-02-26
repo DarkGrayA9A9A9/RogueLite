@@ -47,6 +47,9 @@ public class PlayerStatus : MonoBehaviour
             PlayerStatus.instance = this;
 
         Load();
+
+        currentHealth = maxHealth * (enforceHealth + increaseHealth);
+        currentStamina = maxStamina * (enforceStamina + increaseStamina);
     }
 
     void Update()

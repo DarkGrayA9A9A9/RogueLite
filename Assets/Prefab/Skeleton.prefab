@@ -186,17 +186,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   monsterType: 1
+  random: 0
   currentHealth: 75
   maxHealth: 75
   exp: 10
   attack: 8
+  money: 0
   moveValue: 0
   moveSpeed: 5
   chaseDistance: 30
   attackDistance: 5
-  knockBackPower: 5
-  lastAttack: 3
-  attackDelay: 3
+  knockBackPower: 4
+  lastAttack: 2
+  attackDelay: 2
   attacking: 0
   platformCheck: 0
   stun: 0

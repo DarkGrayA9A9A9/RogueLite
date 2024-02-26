@@ -49,23 +49,10 @@ public class PlayerController : MonoBehaviour
     [Header("# UI")]
     public Image blackBG;
 
-    [Header("# Sound Effects")]
-    public AudioClip[] attackSound;
-    public AudioClip jumpSound;
-    public AudioClip dashSound;
-    public AudioClip hitSound;
-    public AudioClip dieSound;
-    public AudioClip guardSound;
-    public AudioClip monsterHitSound;
-    public AudioClip[] monsterDieSound;
-    public AudioClip menuSound;
-    public AudioClip enforceSound;
-
     Rigidbody2D rigid;
     CapsuleCollider2D coll;
     SpriteRenderer spriter;
     Animator anim;
-    AudioSource audio;
 
     public static PlayerController instance;
 
@@ -75,7 +62,6 @@ public class PlayerController : MonoBehaviour
         coll = GetComponent<CapsuleCollider2D>();
         spriter = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
-        audio = GetComponent<AudioSource>();
 
         if (PlayerController.instance == null)
             PlayerController.instance = this;
@@ -175,7 +161,7 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
-        if (attacking || powerAttacking || dashing || guarding || stuned || lastJump < jumpDelay || GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce)
+        if (attacking || powerAttacking || dashing || guarding || stuned || lastJump < jumpDelay || GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce || GameManager.instance.delay < 0.1f)
             return;
 
         lastJump = 0f;
@@ -190,7 +176,7 @@ public class PlayerController : MonoBehaviour
 
         if (!jumping[0])
         {
-            audio.PlayOneShot(jumpSound);
+            SoundEffect.instance.Jump();
             jumping[0] = true;
             anim.SetBool("Jump0", true);
             rigid.velocity = Vector2.zero;
@@ -198,7 +184,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (!jumping[1])
         {
-            audio.PlayOneShot(jumpSound);
+            SoundEffect.instance.Jump();
             jumping[1] = true;
             anim.SetBool("Jump1", true);
             rigid.velocity = Vector2.zero;
@@ -209,6 +195,7 @@ public class PlayerController : MonoBehaviour
     void DownJump()
     {
         CancelInvoke("CancelDownJump");
+        SoundEffect.instance.Jump();
         coll.isTrigger = true;
         rigid.velocity = Vector2.zero;
         rigid.AddForce(Vector2.down * 5f, ForceMode2D.Impulse);
@@ -247,7 +234,7 @@ public class PlayerController : MonoBehaviour
 
     void Attack()
     {
-        if (guarding || dashing || stuned)
+        if (guarding || dashing || stuned || GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce || GameManager.instance.delay < 0.1f)
             return;
 
         if (lastAttack > attackDelay)
@@ -256,17 +243,15 @@ public class PlayerController : MonoBehaviour
             attacking = true;
             anim.SetBool("Attack", true);
             PlayerAttack.instance.AttackOn();
-            audio.clip = attackSound[0];
+            SoundEffect.instance.Attack();
 
             if (!attackCombo)
             {
-                audio.Play();
                 attackCombo = true;
                 anim.SetTrigger("Attack0");
             }
             else
             {
-                audio.Play();
                 attackCombo = false;
                 anim.SetTrigger("Attack1");
             }
@@ -275,7 +260,7 @@ public class PlayerController : MonoBehaviour
 
     void PowerAttack()
     {
-        if (dashing || guarding || stuned)
+        if (dashing || guarding || stuned || GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce || GameManager.instance.delay < 0.1f)
             return;
 
         powerAttackCharge += Time.deltaTime;
@@ -302,7 +287,7 @@ public class PlayerController : MonoBehaviour
 
     void GuardUp()
     {
-        if (dashing || powerAttacking || attacking || stuned)
+        if (dashing || powerAttacking || attacking || stuned || GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce || GameManager.instance.delay < 0.1f)
             return;
 
         if (PlayerStatus.instance.currentStamina > guardCost)
@@ -329,12 +314,12 @@ public class PlayerController : MonoBehaviour
 
     void Dash()
     {
-        if (dashing || guarding || powerAttacking || stuned)
+        if (dashing || guarding || powerAttacking || stuned || GameManager.instance.paused || GameManager.instance.levelUp || GameManager.instance.enforce || GameManager.instance.delay < 0.1f)
             return;
 
         if (lastDash > dashDelay && PlayerStatus.instance.currentStamina >= dashCost)
         {
-            audio.PlayOneShot(dashSound, audio.volume * 20f);
+            SoundEffect.instance.Dash();
             PlayerStatus.instance.currentStamina -= dashCost;
             attacking = false;
             dashing = true;
@@ -403,18 +388,6 @@ public class PlayerController : MonoBehaviour
             flipCheck = false;
     }
 
-    public void KnockBackL()
-    {
-        rigid.velocity = Vector2.zero;
-        rigid.AddForce(Vector2.left * knockBackPower, ForceMode2D.Impulse);
-    }
-
-    public void KnockBackR()
-    {
-        rigid.velocity = Vector2.zero;
-        rigid.AddForce(Vector2.right * knockBackPower, ForceMode2D.Impulse);
-    }
-
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Floor"))
@@ -426,7 +399,7 @@ public class PlayerController : MonoBehaviour
                 return;
 
             lastHit = 0;
-            audio.PlayOneShot(hitSound);
+            SoundEffect.instance.Hit();
             anim.SetTrigger("Hit");
             stuned = true;
             invincibility = true;
@@ -447,18 +420,17 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("EnemyAttack") && !stuned && !invincibility && !die)
+        if ((collision.gameObject.CompareTag("EnemyAttack") && !stuned && !invincibility && !die))
         {
             if (guarding)
             {
                 if ((collision.gameObject.transform.position.x > rigid.transform.position.x && !spriter.flipX) || collision.gameObject.transform.position.x < rigid.transform.position.x && spriter.flipX)
                 {
-                    audio.PlayOneShot(guardSound);
+                    SoundEffect.instance.Guard();
                     return;
                 }   
             }
 
-            audio.PlayOneShot(hitSound);
             anim.SetTrigger("Hit");
             lastHit = 0;
             stuned = true;
@@ -478,7 +450,7 @@ public class PlayerController : MonoBehaviour
         if (!die)
         {
             GameManager.instance.Save();
-            audio.PlayOneShot(dieSound);
+            SoundEffect.instance.Die();
             Physics2D.IgnoreLayerCollision(3, 7, true);
             die = true;
             anim.SetBool("Death", true);
@@ -603,44 +575,5 @@ public class PlayerController : MonoBehaviour
     {
         GameManager.instance.DungeonSetting();
         gameObject.transform.position = target;
-    }
-
-    public void MonsterAttackSound()
-    {
-        audio.PlayOneShot(monsterHitSound);
-    }
-
-    public void PowerAttackSound()
-    {
-        audio.clip = attackSound[1];
-        audio.Play();
-    }
-
-    public void MonsterDieSound(int type)
-    {
-        switch (type)
-        {
-            case 0:
-                audio.PlayOneShot(monsterDieSound[0]);
-                break;
-            case 1:
-                audio.PlayOneShot(monsterDieSound[1]);
-                break;
-        }
-    }
-
-    public void MenuSound()
-    {
-        audio.PlayOneShot(menuSound);
-    }
-
-    public void SoundEffectSetting()
-    {
-        audio.volume = GameManager.instance.SEValue;
-    }
-
-    public void EnforceSound()
-    {
-        audio.PlayOneShot(enforceSound);
     }
 }

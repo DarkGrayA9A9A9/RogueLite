@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     [Header("# Objects")]
     public GameObject[] dungeonMaps;
     public GameObject[] monsterPrefabs;
+    public GameObject[] bossPrefabs;
 
     GameObject monster;
 
@@ -54,9 +55,11 @@ public class GameManager : MonoBehaviour
     public GameObject[] skillCursor;
 
     [Header("# In Game UI")]
+    public GameObject monsterIcon;
     public Text showFloor;
     public Text showLeftMonster;
     public Text showMoney;
+    public GameObject clearText;
 
     [Header("# Pause Menu UI")]
     public GameObject pauseMenu;
@@ -246,13 +249,13 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetButtonDown("Up") && selectEnforce > 0)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectEnforce--;
         }
 
         if (Input.GetButtonDown("Down") && selectEnforce < 4)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectEnforce++;
         }
 
@@ -284,7 +287,7 @@ public class GameManager : MonoBehaviour
                 case 0:
                     if (enforcePrice[attackLV] <= money && attackLV < enforcePrice.Length)
                     {
-                        PlayerController.instance.EnforceSound();
+                        SoundEffect.instance.Enforce();
                         PlayerStatus.instance.enforceAttack += 0.2f;
                         money -= enforcePrice[attackLV];
                         attackLV++;
@@ -294,7 +297,7 @@ public class GameManager : MonoBehaviour
                 case 1:
                     if (enforcePrice[powerAttackLV] <= money && powerAttackLV < enforcePrice.Length)
                     {
-                        PlayerController.instance.EnforceSound();
+                        SoundEffect.instance.Enforce();
                         PlayerStatus.instance.enforcePowerAttack += 0.2f;
                         money -= enforcePrice[powerAttackLV];
                         powerAttackLV++;
@@ -304,7 +307,7 @@ public class GameManager : MonoBehaviour
                 case 2:
                     if (enforcePrice[healthLV] <= money && healthLV < enforcePrice.Length)
                     {
-                        PlayerController.instance.EnforceSound();
+                        SoundEffect.instance.Enforce();
                         PlayerStatus.instance.enforceHealth += 0.2f;
                         money -= enforcePrice[healthLV];
                         healthLV++;
@@ -314,7 +317,7 @@ public class GameManager : MonoBehaviour
                 case 3:
                     if (enforcePrice[staminaLV] <= money && staminaLV < enforcePrice.Length)
                     {
-                        PlayerController.instance.EnforceSound();
+                        SoundEffect.instance.Enforce();
                         PlayerStatus.instance.enforceStamina += 0.2f;
                         money -= enforcePrice[staminaLV];
                         staminaLV++;
@@ -324,7 +327,7 @@ public class GameManager : MonoBehaviour
                 case 4:
                     if (enforcePrice[speedLV] <= money && speedLV < enforcePrice.Length)
                     {
-                        PlayerController.instance.EnforceSound();
+                        SoundEffect.instance.Enforce();
                         PlayerStatus.instance.enforceSpeed += 0.2f;
                         money -= enforcePrice[speedLV];
                         speedLV++;
@@ -370,7 +373,7 @@ public class GameManager : MonoBehaviour
 
         if (!paused)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectMenu = 0;
             paused = true;
             pauseMenu.SetActive(true);
@@ -380,17 +383,17 @@ public class GameManager : MonoBehaviour
         {
             if (statusMenu)
             {
-                PlayerController.instance.MenuSound();
+                SoundEffect.instance.Menu();
                 statusMenu = false;
             } 
             else if (optionMenu)
             {
-                PlayerController.instance.MenuSound();
+                SoundEffect.instance.Menu();
                 optionMenu = false;
             } 
             else
             {
-                PlayerController.instance.MenuSound();
+                SoundEffect.instance.Menu();
                 paused = false;
                 statusMenu = false;
                 optionMenu = false;
@@ -407,14 +410,14 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetButtonDown("Up") && selectMenu > 0)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectMenu--;
         }
             
 
         if (Input.GetButtonDown("Down") && selectMenu < 3)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectMenu++;
         }
         
@@ -442,7 +445,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Return))
         {
             delay = 0;
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
 
             switch (selectMenu)
             {
@@ -481,7 +484,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Escape))
         {
             delay = 0;
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             statusMenu = false;
             statusMenuCanvas.SetActive(false);
         }
@@ -494,13 +497,13 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetButtonDown("Up") && selectOption > 0)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectOption--;
         }
 
         if (Input.GetButtonDown("Down") && selectOption < 2)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectOption++;
         }
 
@@ -511,13 +514,13 @@ public class GameManager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.A) && BGMValue > 0.01f)
                 {
-                    PlayerController.instance.MenuSound();
+                    SoundEffect.instance.Menu();
                     BGMValue -= 0.1f;
                 }
 
                 if (Input.GetKeyDown(KeyCode.D) && BGMValue < 0.99f)
                 {
-                    PlayerController.instance.MenuSound();
+                    SoundEffect.instance.Menu();
                     BGMValue += 0.1f;
                 }
                 break;
@@ -526,13 +529,13 @@ public class GameManager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.A) && SEValue > 0.01f)
                 {
-                    PlayerController.instance.MenuSound();
+                    SoundEffect.instance.Menu();
                     SEValue -= 0.1f;
                 }
 
                 if (Input.GetKeyDown(KeyCode.D) && SEValue < 0.99f)
                 {
-                    PlayerController.instance.MenuSound();
+                    SoundEffect.instance.Menu();
                     SEValue += 0.1f;
                 }
                 break;
@@ -541,7 +544,7 @@ public class GameManager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
                 {
-                    PlayerController.instance.MenuSound();
+                    SoundEffect.instance.Menu();
 
                     if (language == 0)
                         language = 1;
@@ -559,14 +562,14 @@ public class GameManager : MonoBehaviour
         {
             delay = 0;
             OptionSave();
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             optionMenu = false;
             optionMenuCanvas.SetActive(false);
             selectOption = 0;
             optionCursor.GetComponent<RectTransform>().anchoredPosition = new Vector2(-195, 130);
         }
 
-        PlayerController.instance.SoundEffectSetting();
+        SoundEffect.instance.SoundEffectSetting();
     }
 
 
@@ -730,20 +733,37 @@ public class GameManager : MonoBehaviour
                 showFloor.text = "´øÀü " + floor.ToString() + "Ãþ";
             else
                 showFloor.text = "Floor " + floor.ToString();
+
+            if (!monsterIcon.activeSelf)
+                monsterIcon.SetActive(true);
         }
         else
         {
             showLeftMonster.text = "";
             showFloor.text = "";
+
+            if (monsterIcon.activeSelf)
+                monsterIcon.SetActive(false);
         }
     }
 
     public void DungeonSetting()
     {
         floor++;
-        dungeonNum = Random.Range(0, 5);
-        monsterNum = Random.Range(6, 16);
-        leftMonster = monsterNum;
+
+        if (floor % 5 == 0)
+        {
+            dungeonNum = 4;
+            monsterNum = 1;
+            leftMonster = 1;
+        } 
+        else
+        {
+            dungeonNum = Random.Range(0, 5);
+            monsterNum = Random.Range(6, 16);
+            leftMonster = monsterNum;
+        }
+            
 
         for (int index = 0; index < 5; index++)
         {
@@ -755,13 +775,41 @@ public class GameManager : MonoBehaviour
 
         for (int index = 0; index < monsterNum; index++)
         {
-            float x = Random.Range(200f, 300f);
-            float y = Random.Range(0f, 50f);
+            float x;
+            float y;
 
-            if (floor < 10)
-                monster = Instantiate(monsterPrefabs[0]);
+            if (floor == 5)
+            {
+                x = 250;
+                y = 15;
+            }
             else
-                monster = Instantiate(monsterPrefabs[1]);
+            {
+                x = Random.Range(200f, 300f);
+                y = Random.Range(0f, 50f);
+            }
+
+            if (floor <= 5)
+            {
+                if (floor == 5)
+                    monster = Instantiate(bossPrefabs[0]);
+                else
+                    monster = Instantiate(monsterPrefabs[0]);
+            }
+            else if (floor <= 10)
+            {
+                if (floor == 10)
+                    monster = Instantiate(bossPrefabs[1]);
+                else
+                    monster = Instantiate(monsterPrefabs[1]);
+            }
+            else
+            {
+                if (floor == 15)
+                    monster = Instantiate(bossPrefabs[2]);
+                else
+                    monster = Instantiate(monsterPrefabs[2]);
+            }
 
             monster.transform.position = new Vector3(x, y, 0);
             monster.SetActive(true);
@@ -798,13 +846,13 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetButtonDown("Up") && selectSkill > 0)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectSkill--;
         }
 
         if (Input.GetButtonDown("Down") && selectSkill < 2)
         {
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
             selectSkill++;
         }
 
@@ -827,7 +875,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Return))
         {
             delay = 0;
-            PlayerController.instance.MenuSound();
+            SoundEffect.instance.Menu();
 
             switch (showSelectSkill[selectSkill].id)
             {
@@ -858,5 +906,18 @@ public class GameManager : MonoBehaviour
             levelUpSystem.SetActive(false);
             Time.timeScale = 1;
         }
+    }
+
+    public void GameClear()
+    {
+        Save();
+        SoundEffect.instance.Clear();
+        clearText.SetActive(true);
+        Invoke("ClearExit", 5f);
+    }
+
+    void ClearExit()
+    {
+        Application.Quit();
     }
 }
