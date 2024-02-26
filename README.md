@@ -8,7 +8,7 @@
 
 # 다운로드
 
-https://drive.google.com/file/d/1LizrVZyc3-TSfn1i_AjfL76gdsxlz3Va/view?usp=drive_link
+https://drive.google.com/file/d/1mUA5FR9nTGWt-znNSaVCKXN1UmIPQa5G/view?usp=drive_link
 
 # 웹버전
 
