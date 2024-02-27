@@ -470,6 +470,7 @@ public class GameManager : MonoBehaviour
                     optionMenuCanvas.SetActive(true);
                     break;
                 case 3:
+                    Save();
                     Application.Quit();
                     break;
             }
