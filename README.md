@@ -2,10 +2,6 @@
 
 간단한 로그라이트 게임입니다.
 
-# 프로젝트 기간
-
-약 1주일
-
 # 다운로드
 
 https://drive.google.com/file/d/1MkLbSaCRW5P1P2nDFCwqS4PAvYmk_tT2/view?usp=drive_link
